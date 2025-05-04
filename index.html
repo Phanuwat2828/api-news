@@ -10,639 +10,156 @@
     <script src="https://unpkg.com/compromise"></script>
 </head>
 <body class="bg-gray-100 min-h-screen">
-    <div class="container mx-auto px-4 py-8">
-        <!-- Header -->
-        <header class="mb-10">
-            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div>
-                    <h1 class="text-3xl font-bold text-yellow-600">
-                        <i class="fas fa-coins mr-2"></i>Gold News Analyzer
-                    </h1>
-                    <p class="text-gray-600 mt-2">Analyzing news impact on gold prices</p>
-                </div>
-                <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full md:w-auto">
-                    <div class="relative flex-grow">
-                        <input type="text" id="searchInput" placeholder="Search news..." 
-                               class="w-full pl-10 pr-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-yellow-500">
-                        <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
-                    </div>
-                    <button id="refreshBtn" class="bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded-lg transition whitespace-nowrap">
-                        <i class="fas fa-sync-alt mr-2"></i>Refresh
-                    </button>
-                </div>
+    <div class="container mx-auto px-4 py-4 sm:py-8">
+        <!-- Header Section - Stacked on mobile, row on larger screens -->
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+            <!-- Gold News Header -->
+            <div class="flex-1">
+                <h1 class="text-2xl sm:text-3xl font-bold text-yellow-600">
+                    <i class="fas fa-coins mr-2"></i>Gold News 
+                </h1>
+                <p class="text-gray-600 text-sm sm:text-base mt-1 sm:mt-2">News impact on gold prices</p>
             </div>
-        </header>
-
-        <!-- Stats Overview -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 mb-10" id="statsContainer">
-            <!-- Stats will be loaded dynamically -->
+            
+            <!-- Forex Factory Header -->
+            <div class="flex-1">
+                <a class="text-2xl sm:text-3xl font-bold text-blue-600 hover:text-blue-800 transition" href="https://www.forexfactory.com/calendar">
+                    <i class="fas fa-calendar-alt mr-2"></i>forexfactory.com
+                </a>
+                <p class="text-gray-600 text-sm sm:text-base mt-1 sm:mt-2">Economic events that move the markets</p>
+            </div>
+            
+            <!-- Thai Clock - Centered on mobile, right on larger screens -->
+            <div class="flex-1 text-center md:text-right">
+                <div id="thai-clock" class="text-2xl sm:text-3xl font-bold text-blue-600"></div>
+                <div id="thai-date" class="text-gray-500 text-sm sm:text-base mt-1 sm:mt-2"></div>
+            </div>
         </div>
 
-        <!-- Main Content -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <!-- News List -->
-            <div class="lg:col-span-2">
-                <div class="bg-white rounded-lg shadow overflow-hidden">
-                    <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-                        <h2 class="text-xl font-semibold">Latest Gold News</h2>
-                        <div class="flex items-center space-x-2">
-                            <span class="text-sm text-gray-500">Sort by:</span>
-                            <select id="sortSelect" class="border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-yellow-500">
-                                <option value="publishedAt">Newest</option>
-                                <option value="relevancy">Relevance</option>
-                                <option value="popularity">Popularity</option>
-                            </select>
-                        </div>
-                    </div>
-                    
-                    <div class="divide-y divide-gray-200" id="newsContainer">
-                        <!-- News items will be loaded here -->
-                        <div class="p-6 text-center text-gray-500">
-                            <i class="fas fa-spinner fa-spin text-2xl mb-2"></i>
-                            <p>Loading news...</p>
-                        </div>
-                    </div>
-                    
-                    <div class="px-6 py-4 border-t border-gray-200 text-center">
-                        <button id="loadMoreBtn" class="text-yellow-600 hover:text-yellow-800 font-medium hidden">
-                            Load More News
-                        </button>
+        <!-- Main Content - Stacked on mobile, side-by-side on larger screens -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            <!-- Chart Section - Full width on mobile, 2/3 on desktop -->
+            <div class="lg:col-span-2 bg-white rounded-lg shadow-md overflow-hidden">
+                <div class="p-2 sm:p-3 h-[400px] sm:h-[500px] lg:h-[600px]">
+                    <div class="tradingview-widget-container__widget rounded-lg h-full">
+                        <div id="tradingview_chart" class="h-full w-full"></div>
+                        <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
+                        <script>
+                        new TradingView.widget({
+                            "autosize": true,
+                            "symbol": "OANDA:XAUUSD",
+                            "interval": "D",
+                            "timezone": "Etc/UTC",
+                            "theme": "light",
+                            "style": "1",
+                            "locale": "en",
+                            "toolbar_bg": "#f1f3f6",
+                            "enable_publishing": false,
+                            "hide_side_toolbar": false,
+                            "allow_symbol_change": true,
+                            "container_id": "tradingview_chart",
+                            "disabled_features": ["header_widget"]
+                        });
+                        </script>
                     </div>
                 </div>
             </div>
             
-            <!-- Analysis Sidebar -->
-            <div>
-                <div class="bg-white rounded-lg shadow overflow-hidden mb-6">
-                    <div class="px-6 py-4 border-b border-gray-200">
-                        <h2 class="text-xl font-semibold">Sentiment Analysis</h2>
-                    </div>
-                    <div class="p-6">
-                        <div class="h-64 flex items-center justify-center">
-                            <canvas id="sentimentChart"></canvas>
+            <!-- Calendar Section - Full width on mobile, 1/3 on desktop -->
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-200">
+                <!-- Widget Header -->
+                <div class="bg-gradient-to-r from-blue-600 to-blue-800 px-4 sm:px-6 py-3 sm:py-4">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-3">
+                        <div class="flex items-center">
+                            <svg class="h-5 sm:h-6 w-5 sm:w-6 text-white mr-2" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zM9 14H7v-2h2v2zm4 0h-2v-2h2v2zm4 0h-2v-2h2v2zm-8 4H7v-2h2v2zm4 0h-2v-2h2v2zm4 0h-2v-2h2v2z"/>
+                            </svg>
+                            <h2 class="text-base sm:text-lg font-bold text-white">Market Economic Calendar</h2>
                         </div>
-                        <div class="space-y-4 mt-6" id="sentimentBars">
-                            <!-- Sentiment bars will be loaded here -->
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="bg-white rounded-lg shadow overflow-hidden">
-                    <div class="px-6 py-4 border-b border-gray-200">
-                        <h2 class="text-xl font-semibold">Top Impactful Keywords</h2>
-                    </div>
-                    <div class="p-6">
-                        <div class="flex flex-wrap gap-2" id="keywordsContainer">
-                            <!-- Keywords will be loaded here -->
+                        <div class="flex items-center space-x-2 bg-blue-700/30 px-2 sm:px-3 py-1 rounded-full">
+                            <span class="text-blue-100 text-xs sm:text-sm">Live Data</span>
+                            <div class="h-2 w-2 bg-green-400 rounded-full animate-pulse"></div>
                         </div>
                     </div>
                 </div>
-                <div class="container mx-auto py-8">
-                    <!-- Header -->
-                    <header class="mb-8">
-                        <a class="text-3xl font-bold text-blue-600" href="https://www.forexfactory.com/calendar">
-                            <i class="fas fa-calendar-alt mr-2"></i>forexfactory.com
-                        </a>
-                        <p class="text-gray-600 mt-2">Economic events that move the markets</p>
-                    </header>
-                    <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-200 w-full">
-                        <!-- Widget Header -->
-                        <div class="bg-gradient-to-r from-blue-600 to-blue-800 px-6 py-4">
-                          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                            <div class="flex items-center">
-                              <svg class="h-6 w-6 text-white mr-2" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zM9 14H7v-2h2v2zm4 0h-2v-2h2v2zm4 0h-2v-2h2v2zm-8 4H7v-2h2v2zm4 0h-2v-2h2v2zm4 0h-2v-2h2v2z"/>
-                              </svg>
-                              <h2 class="text-lg font-bold text-white">Market Economic Calendar</h2>
-                            </div>
-                            <div class="flex items-center space-x-2 bg-blue-700/30 px-3 py-1 rounded-full">
-                              <span class="text-blue-100 text-sm">Live Data</span>
-                              <div class="h-2 w-2 bg-green-400 rounded-full animate-pulse"></div>
-                            </div>
-                          </div>
-                        </div>
-            
-                    <!-- Calendar Controls -->
-                    
-            
-                    <!-- Calendar Events -->
-                    <div class="">
-                        <div class="tradingview-widget-container w-full p-4">
-                            <div class="tradingview-widget-container__widget rounded-lg "></div>
-                                <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-events.js" async>
-                                {
-                                    var widgetConfig = {
-                                        "colorTheme": "light",
-                                        "isTransparent": false,
-                                        "width": "100%",
-                                        "height": "500",
-                                        "locale": "en",
-                                        "importanceFilter": "-1,0,1",
-                                        "currencyFilter": "USD,EUR,GBP,JPY,AUD,CAD,NZD,CHF,CNY",
-                                        "utcOffset": "0"
-                                    };
-                                }
-                                </script>
-                            </div>
-                        </div>
-                        <div class="bg-white  p-4 max-w-xs mx-auto">
-                            <div class="text-center">
-                              <div class="text-2xl font-semibold text-gray-700 mb-2">เวลาไทย</div>
-                              <div id="thai-clock" class="text-4xl font-bold text-blue-600"></div>
-                              <div id="thai-date" class="text-lg text-gray-500 mt-2"></div>
-                            </div>
-                          
-                        </div>
 
-
-                      
-                      
-                      
-                      <script>
-                        function updateThaiTime() {
-                          const now = new Date();
-                          
-                          // ตั้งค่าให้เป็นเวลาไทย (UTC+7)
-                          const thaiOffset = 7 * 60 * 60 * 1000;
-                          const thaiTime = new Date(now.getTime() + thaiOffset);
-                          
-                          // รูปแบบเวลา AM/PM
-                          let hours = thaiTime.getUTCHours();
-                          const ampm = hours >= 12 ? 'PM' : 'AM';
-                          hours = hours % 12;
-                          hours = hours ? hours : 12; // ชั่วโมง 0 แสดงเป็น 12
-                          
-                          const minutes = thaiTime.getUTCMinutes().toString().padStart(2, '0');
-                          const seconds = thaiTime.getUTCSeconds().toString().padStart(2, '0');
-                          
-                          // รูปแบบวันที่ไทย
-                          const thaiMonths = [
-                           'มกราคม Jan', 
-                            'กุมภาพันธ์ Feb', 
-                            'มีนาคม Mar',
-                            'เมษายน Apr',
-                            'พฤษภาคม May',
-                            'มิถุนายน Jun',
-                            'กรกฎาคม Jul',
-                            'สิงหาคม Aug',
-                            'กันยายน Sep',
-                            'ตุลาคม Oct',
-                            'พฤศจิกายน Nov',
-                            'ธันวาคม Dec'
-                          ];
-                          const day = thaiTime.getUTCDate();
-                          const month = thaiMonths[thaiTime.getUTCMonth()];
-                          const year = thaiTime.getUTCFullYear() + 543; // แปลงเป็นปี พ.ศ.
-                          
-                          const thaiDays = [
-                            'อาทิตย์', 'จันทร์', 'อังคาร', 'พุธ',
-                            'พฤหัสบดี', 'ศุกร์', 'เสาร์'
-                          ];
-                          const dayOfWeek = thaiDays[thaiTime.getUTCDay()];
-                          
-                          // แสดงผล
-                          document.getElementById('thai-clock').textContent = 
-                            `${hours}:${minutes}:${seconds} ${ampm}`;
-                          
-                          document.getElementById('thai-date').textContent = 
-                            `วัน${dayOfWeek}ที่ ${day} ${month} พ.ศ. ${year}`;
+                <div class="h-[400px] sm:h-[500px] overflow-y-auto">
+                    <div class="tradingview-widget-container w-full h-full">
+                        <div class="tradingview-widget-container__widget rounded-lg h-full"></div>
+                        <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-events.js" async>
+                        {
+                            "colorTheme": "light",
+                            "isTransparent": false,
+                            "width": "100%",
+                            "height": "100%",
+                            "locale": "en",
+                            "importanceFilter": "-1,0,1",
+                            "currencyFilter": "USD,EUR,GBP,JPY,AUD,CAD,NZD,CHF,CNY",
+                            "utcOffset": "0"
                         }
-                        
-                        // อัพเดทเวลาทุก 1 วินาที
-                        updateThaiTime();
-                        setInterval(updateThaiTime, 1000);
-                      </script>
-                    
+                        </script>
+                    </div>
                 </div>
-                
             </div>
         </div>
     </div>
 
+    <script>
+        function updateThaiTime() {
+            const now = new Date();
+            
+            // Set to Thai time (UTC+7)
+            const thaiOffset = 7 * 60 * 60 * 1000;
+            const thaiTime = new Date(now.getTime() + thaiOffset);
+            
+            // AM/PM time format
+            let hours = thaiTime.getUTCHours();
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            hours = hours % 12;
+            hours = hours ? hours : 12; // 0 hour shows as 12
+            
+            const minutes = thaiTime.getUTCMinutes().toString().padStart(2, '0');
+            const seconds = thaiTime.getUTCSeconds().toString().padStart(2, '0');
+            
+            // Thai date format
+            const thaiMonths = [
+                'มกราคม Jan', 
+                'กุมภาพันธ์ Feb', 
+                'มีนาคม Mar',
+                'เมษายน Apr',
+                'พฤษภาคม May',
+                'มิถุนายน Jun',
+                'กรกฎาคม Jul',
+                'สิงหาคม Aug',
+                'กันยายน Sep',
+                'ตุลาคม Oct',
+                'พฤศจิกายน Nov',
+                'ธันวาคม Dec'
+            ];
+            const day = thaiTime.getUTCDate();
+            const month = thaiMonths[thaiTime.getUTCMonth()];
+            const year = thaiTime.getUTCFullYear() + 543; // Convert to Buddhist year
+            
+            const thaiDays = [
+                'อาทิตย์', 'จันทร์', 'อังคาร', 'พุธ',
+                'พฤหัสบดี', 'ศุกร์', 'เสาร์'
+            ];
+            const dayOfWeek = thaiDays[thaiTime.getUTCDay()];
+            
+            // Display
+            document.getElementById('thai-clock').textContent = 
+                `${hours}:${minutes}:${seconds} ${ampm}`;
+            
+            document.getElementById('thai-date').textContent = 
+                `วัน${dayOfWeek}ที่ ${day} ${month} พ.ศ. ${year}`;
+        }
+        
+        // Update time every second
+        updateThaiTime();
+        setInterval(updateThaiTime, 1000);
+    </script>
+    
     <!-- Chart.js for sentiment visualization -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-    <script>
-        // Configuration
-        const API_KEY = '932cf2298648437a9374a7798955fa24'; // Replace with your actual NewsAPI key
-        const PAGE_SIZE = 10;
-        let currentPage = 1;
-        let totalResults = 0;
-        let allArticles = [];
-        // const sentimentAnalyzer = window.sentiment;
-        
-        // DOM Elements
-        const newsContainer = document.getElementById('newsContainer');
-        const statsContainer = document.getElementById('statsContainer');
-        const sentimentBars = document.getElementById('sentimentBars');
-        const keywordsContainer = document.getElementById('keywordsContainer');
-        const refreshBtn = document.getElementById('refreshBtn');
-        const loadMoreBtn = document.getElementById('loadMoreBtn');
-        const searchInput = document.getElementById('searchInput');
-        const sortSelect = document.getElementById('sortSelect');
-        
-        // Chart variables
-        let sentimentChart;
-        
-        // Initialize the app
-        document.addEventListener('DOMContentLoaded', function() {
-            fetchNews();
-            
-            // Set up event listeners
-            refreshBtn.addEventListener('click', function() {
-                currentPage = 1;
-                fetchNews();
-            });
-            
-            loadMoreBtn.addEventListener('click', function() {
-                currentPage++;
-                fetchNews(false);
-            });
-            
-            searchInput.addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    currentPage = 1;
-                    fetchNews();
-                }
-            });
-            
-            sortSelect.addEventListener('change', function() {
-                currentPage = 1;
-                fetchNews();
-            });
-        });
-        
-        // Fetch news from NewsAPI
-        async function fetchNews(clearExisting = true) {
-            try {
-                if (clearExisting) {
-                    newsContainer.innerHTML = '<div class="p-6 text-center text-gray-500"><i class="fas fa-spinner fa-spin text-2xl mb-2"></i><p>Loading news...</p></div>';
-                    loadMoreBtn.classList.add('hidden');
-                }
-                
-                const query = searchInput.value || 'gold OR "gold price" OR "gold market" OR "gold demand" ORทองคำ OR "USD"';
-                const sortBy = sortSelect.value;
-                
-                const response = await axios.get(
-                    `https://newsapi.org/v2/everything?q=${encodeURIComponent(query)}&pageSize=${PAGE_SIZE}&page=${currentPage}&sortBy=${sortBy}&apiKey=${API_KEY}`
-                );
-                
-                const data = response.data;
-                
-                if (clearExisting) {
-                    allArticles = data.articles;
-                    totalResults = data.totalResults;
-                } else {
-                    allArticles = [...allArticles, ...data.articles];
-                }
-                
-                renderNews();
-                analyzeSentiments();
-                extractKeywords();
-                updateStats();
-                
-                // Show/hide load more button
-                if (allArticles.length < totalResults) {
-                    loadMoreBtn.classList.remove('hidden');
-                } else {
-                    loadMoreBtn.classList.add('hidden');
-                }
-                
-            } catch (error) {
-                console.error('Error fetching news:', error);
-                newsContainer.innerHTML = `
-                    <div class="p-6 text-center text-red-500">
-                        <i class="fas fa-exclamation-triangle text-2xl mb-2"></i>
-                        <p>Failed to load news. ${error.response?.data?.message || error.message}</p>
-                    </div>
-                `;
-            }
-        }
-        
-        // Render news articles
-        function renderNews() {
-            if (allArticles.length === 0) {
-                newsContainer.innerHTML = '<div class="p-6 text-center text-gray-500">No news found matching your criteria.</div>';
-                return;
-            }
-            
-            newsContainer.innerHTML = '';
-            
-            allArticles.forEach(article => {
-                const sentimentScore = getSentimentScore(article);
-                const sentimentClass = getSentimentClass(sentimentScore);
-                
-                const newsItem = document.createElement('div');
-                newsItem.className = 'p-6 hover:bg-gray-50 transition';
-                newsItem.innerHTML = `
-                    <div class="flex flex-col sm:flex-row justify-between items-start gap-3">
-                        <div class="flex-1">
-                            <span class="inline-block px-2 py-1 text-xs font-semibold ${getSourceColorClass(article.source.name)} rounded mb-2">
-                                ${article.source.name}
-                            </span>
-                            <h3 class="text-lg font-medium">${article.title}</h3>
-                            <p class="mt-1 text-gray-600">${article.description || 'No description available'}</p>
-                        </div>
-                        <span class="px-2 py-1 text-xs font-semibold ${sentimentClass.background} ${sentimentClass.text} rounded whitespace-nowrap">
-                            ${sentimentClass.label}
-                        </span>
-                    </div>
-                    <div class="mt-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                        <span class="text-sm text-gray-500">${formatDate(article.publishedAt)}</span>
-                        <div class="flex items-center gap-3">
-                            <span class="text-sm ${sentimentClass.text} font-medium">
-                                Score: ${sentimentScore.toFixed(1)}
-                            </span>
-                            <a href="${article.url}" target="_blank" class="text-yellow-600 hover:text-yellow-800 text-sm font-medium">
-                                Read More <i class="fas fa-external-link-alt ml-1"></i>
-                            </a>
-                        </div>
-                    </div>
-                `;
-                newsContainer.appendChild(newsItem);
-            });
-        }
-        
-        // Analyze sentiments of all articles
-        function analyzeSentiments() {
-            const sentimentResults = {
-                positive: 0,
-                negative: 0,
-                neutral: 0,
-                totalScore: 0
-            };
-            
-            allArticles.forEach(article => {
-                const score = getSentimentScore(article);
-                sentimentResults.totalScore += score;
-                
-                if (score >= 0.2) sentimentResults.positive++;
-                else if (score <= -0.2) sentimentResults.negative++;
-                else sentimentResults.neutral++;
-            });
-            
-            // Update sentiment bars
-            const total = allArticles.length;
-            sentimentBars.innerHTML = `
-                <div>
-                    <div class="flex justify-between mb-1">
-                        <span class="text-sm font-medium text-green-600">Positive</span>
-                        <span class="text-sm text-gray-500">${total > 0 ? Math.round((sentimentResults.positive / total) * 100) : 0}%</span>
-                    </div>
-                    <div class="w-full bg-gray-200 rounded-full h-2">
-                        <div class="bg-green-500 h-2 rounded-full" style="width: ${total > 0 ? (sentimentResults.positive / total) * 100 : 0}%"></div>
-                    </div>
-                </div>
-                <div>
-                    <div class="flex justify-between mb-1">
-                        <span class="text-sm font-medium text-red-600">Negative</span>
-                        <span class="text-sm text-gray-500">${total > 0 ? Math.round((sentimentResults.negative / total) * 100) : 0}%</span>
-                    </div>
-                    <div class="w-full bg-gray-200 rounded-full h-2">
-                        <div class="bg-red-500 h-2 rounded-full" style="width: ${total > 0 ? (sentimentResults.negative / total) * 100 : 0}%"></div>
-                    </div>
-                </div>
-                <div>
-                    <div class="flex justify-between mb-1">
-                        <span class="text-sm font-medium text-blue-600">Neutral</span>
-                        <span class="text-sm text-gray-500">${total > 0 ? Math.round((sentimentResults.neutral / total) * 100) : 0}%</span>
-                    </div>
-                    <div class="w-full bg-gray-200 rounded-full h-2">
-                        <div class="bg-blue-500 h-2 rounded-full" style="width: ${total > 0 ? (sentimentResults.neutral / total) * 100 : 0}%"></div>
-                    </div>
-                </div>
-            `;
-            
-            // Update chart
-            updateSentimentChart(sentimentResults);
-        }
-        
-        // Update sentiment chart
-        function updateSentimentChart(sentimentResults) {
-            const ctx = document.getElementById('sentimentChart').getContext('2d');
-            
-            // Destroy previous chart if it exists
-            if (sentimentChart) {
-                sentimentChart.destroy();
-            }
-            
-            const total = allArticles.length;
-            const data = {
-                labels: ['Positive', 'Negative', 'Neutral'],
-                datasets: [{
-                    data: [
-                        total > 0 ? (sentimentResults.positive / total) * 100 : 0,
-                        total > 0 ? (sentimentResults.negative / total) * 100 : 0,
-                        total > 0 ? (sentimentResults.neutral / total) * 100 : 0
-                    ],
-                    backgroundColor: [
-                        '#10B981',
-                        '#EF4444',
-                        '#3B82F6'
-                    ],
-                    borderWidth: 0
-                }]
-            };
-            
-            sentimentChart = new Chart(ctx, {
-                type: 'doughnut',
-                data: data,
-                options: {
-                    responsive: true,
-                    plugins: {
-                        legend: {
-                            position: 'bottom',
-                        },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    return `${context.label}: ${context.raw.toFixed(1)}%`;
-                                }
-                            }
-                        }
-                    },
-                    cutout: '70%'
-                }
-            });
-        }
-        
-        // Extract and display keywords
-        function extractKeywords() {
-            // Simple keyword extraction (in a real app you'd use more sophisticated analysis)
-            const commonWords = new Set(['the', 'and', 'for', 'with', 'gold', 'price', 'market', 'prices', 'said']);
-            const keywordCounts = {};
-            
-            allArticles.forEach(article => {
-                const text = `${article.title} ${article.description}`.toLowerCase();
-                const words = text.match(/\b(\w+)\b/g) || [];
-                
-                words.forEach(word => {
-                    if (word.length > 3 && !commonWords.has(word)) {
-                        keywordCounts[word] = (keywordCounts[word] || 0) + 1;
-                    }
-                });
-            });
-            
-            // Get top 10 keywords
-            const sortedKeywords = Object.entries(keywordCounts)
-                .sort((a, b) => b[1] - a[1])
-                .slice(0, 10);
-            
-            // Display keywords
-            keywordsContainer.innerHTML = sortedKeywords
-                .map(([keyword, count]) => 
-                    `<span class="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm">
-                        ${keyword} <span class="text-yellow-600 font-medium">${count}</span>
-                    </span>`
-                )
-                .join('');
-        }
-        
-        // Update stats cards
-        function updateStats() {
-            const sentimentResults = {
-                positive: 0,
-                negative: 0,
-                neutral: 0,
-                totalScore: 0
-            };
-            
-            allArticles.forEach(article => {
-                const score = getSentimentScore(article);
-                sentimentResults.totalScore += score;
-                
-                if (score >= 0.2) sentimentResults.positive++;
-                else if (score <= -0.2) sentimentResults.negative++;
-                else sentimentResults.neutral++;
-            });
-            
-            const total = allArticles.length;
-            const avgSentiment = total > 0 ? (sentimentResults.totalScore / total) : 0;
-            
-            statsContainer.innerHTML = `
-                <div class="bg-white p-6 rounded-lg shadow">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-gray-500">Total News</p>
-                            <h3 class="text-2xl font-bold">${total}</h3>
-                        </div>
-                        <div class="bg-yellow-100 p-3 rounded-full">
-                            <i class="fas fa-newspaper text-yellow-600"></i>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="bg-white p-6 rounded-lg shadow">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-gray-500">Positive</p>
-                            <h3 class="text-2xl font-bold text-green-600">${total > 0 ? Math.round((sentimentResults.positive / total) * 100) : 0}%</h3>
-                        </div>
-                        <div class="bg-green-100 p-3 rounded-full">
-                            <i class="fas fa-thumbs-up text-green-600"></i>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="bg-white p-6 rounded-lg shadow">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-gray-500">Negative</p>
-                            <h3 class="text-2xl font-bold text-red-600">${total > 0 ? Math.round((sentimentResults.negative / total) * 100) : 0}%</h3>
-                        </div>
-                        <div class="bg-red-100 p-3 rounded-full">
-                            <i class="fas fa-thumbs-down text-red-600"></i>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="bg-white p-6 rounded-lg shadow">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-gray-500">Avg. Sentiment</p>
-                            <h3 class="text-2xl font-bold ${avgSentiment > 0 ? 'text-green-600' : avgSentiment < 0 ? 'text-red-600' : 'text-blue-600'}">
-                                ${avgSentiment.toFixed(1)}
-                            </h3>
-                        </div>
-                        <div class="${avgSentiment > 0 ? 'bg-green-100' : avgSentiment < 0 ? 'bg-red-100' : 'bg-blue-100'} p-3 rounded-full">
-                            <i class="${avgSentiment > 0 ? 'fas fa-smile text-green-600' : avgSentiment < 0 ? 'fas fa-frown text-red-600' : 'fas fa-meh text-blue-600'}"></i>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-        
-        // Helper functions
-        function getSentimentScore(article) {
-            const text = `${article.title} ${article.description || ''}`;
-            const doc = nlp(text);
-            const adjectives = doc.adjectives().out('array');
-
-            // คำที่ให้คะแนนเชิงบวก/ลบเบื้องต้น
-            const positiveWords = [
-            'good', 'great', 'amazing', 'awesome', 'excellent', 'happy', 'love', 'fantastic', 'brilliant', 'nice',
-            'positive', 'superb', 'wonderful', 'outstanding', 'fabulous', 'pleased', 'delightful', 'perfect', 'marvelous',
-            'charming', 'enjoyable', 'splendid', 'glorious', 'terrific', 'loved', 'incredible', 'satisfying', 'impressive',
-            'grateful', 'cheerful', 'smiling', 'best', 'productive', 'optimistic'
-            ];
-
-            const negativeWords = [
-            'bad', 'terrible', 'horrible', 'awful', 'worst', 'sad', 'hate', 'poor', 'angry', 'upset',
-            'disappointing', 'negative', 'nasty', 'depressing', 'annoying', 'frustrating', 'pathetic', 'unhappy',
-            'disgusting', 'ugly', 'inferior', 'horrid', 'lousy', 'miserable', 'tragic', 'gloomy', 'hopeless',
-            'unpleasant', 'stressful', 'dreadful', 'painful', 'criticized', 'worthless', 'stupid', 'weak'
-            ];
-
-
-            let score = 0;
-            adjectives.forEach(word => {
-                if (positiveWords.includes(word.toLowerCase())) score++;
-                if (negativeWords.includes(word.toLowerCase())) score--;
-            });
-
-            // Normalize score to -1 to 1 range
-            return Math.max(-1, Math.min(1, score / 5));
-        }
-
-        
-        function getSentimentClass(score) {
-            if (score >= 0.2) return {
-                label: 'Positive',
-                background: 'bg-green-100',
-                text: 'text-green-800'
-            };
-            if (score <= -0.2) return {
-                label: 'Negative',
-                background: 'bg-red-100',
-                text: 'text-red-800'
-            };
-            return {
-                label: 'Neutral',
-                background: 'bg-blue-100',
-                text: 'text-blue-800'
-            };
-        }
-        
-        function getSourceColorClass(sourceName) {
-            const colors = {
-                'Bloomberg': 'bg-purple-100 text-purple-800',
-                'Reuters': 'bg-blue-100 text-blue-800',
-                'CNBC': 'bg-red-100 text-red-800',
-                'Financial Times': 'bg-pink-100 text-pink-800',
-                'The Wall Street Journal': 'bg-green-100 text-green-800',
-                'default': 'bg-gray-100 text-gray-800'
-            };
-            
-            for (const [key, value] of Object.entries(colors)) {
-                if (sourceName.includes(key)) return value;
-            }
-            return colors.default;
-        }
-        
-        function formatDate(dateString) {
-            const options = { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' };
-            return new Date(dateString).toLocaleDateString('en-US', options);
-        }
-    </script>
 </body>
 </html>
