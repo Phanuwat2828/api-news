@@ -164,9 +164,6 @@
                 </div>
 
             </div>
-            
-
-
             <!-- Calendar Section - Full width on mobile, 1/3 on desktop -->
             <div class="bg-black rounded-xl shadow-lg overflow-hidden border border-black">
                 <!-- Widget Header -->
@@ -185,7 +182,6 @@
                         </div>
                     </div>
                 </div>
-
                 <div class="h-[400px] sm:h-[656px] overflow-y-auto">
                     <div class="tradingview-widget-container w-full h-full">
                         <div class="tradingview-widget-container__widget rounded-lg h-full"></div>
@@ -250,10 +246,7 @@
                         โหลดเพิ่ม
                 </button>
             </div>
-            
             </div>
-
-
         </div>
     <script>
         function changeColor(change) {
@@ -262,11 +255,9 @@
             if (change >= 200) return "green";
             return "lightgreen";
         }
-
         let allHistory = [];
         let historyIndex = 0;
         const PAGE_SIZE = 20;
-
         async function loadThaiGoldPrice() {
             try {
                 const res = await fetch("https://r2.goldtraders.or.th/latest_prices.json");
@@ -291,10 +282,9 @@
                 document.getElementById("gold-update-time").textContent =
                     `อัปเดตล่าสุด: ${data.metadata.publish_date} ${data.metadata.last_updated}`;
 
-                /* ===== ราคาปัจจุบัน (เหมือนเดิม) ===== */
+                allHistory = data.history.slice();
+                allHistory = allHistory.reverse();
 
-                /* ===== เก็บ history ===== */
-                allHistory = data.history;
                 historyIndex = 0;
                 document.getElementById("history-table").innerHTML = "";
 
@@ -304,12 +294,9 @@
                 console.error(err);
             }
         }
-
         function loadMoreHistory() {
             const tbody = document.getElementById("history-table");
-
             const slice = allHistory.slice(historyIndex, historyIndex + PAGE_SIZE);
-
             slice.forEach((h, i) => {
                 const tr = document.createElement("tr");
 
@@ -335,25 +322,17 @@
                     <td>${h.usd_thb ?? "-"}</td>
                     <td>${h.note ?? ""}</td>
                 `;
-
                 tbody.appendChild(tr);
             });
-
             historyIndex += PAGE_SIZE;
-
-            /* ซ่อนปุ่มถ้าหมดแล้ว */
             if (historyIndex >= allHistory.length) {
                 document.getElementById("load-more").style.display = "none";
             }
-        }
 
+        }
         loadThaiGoldPrice();
 
-
     </script>
-
-
-
 
 
         <script>
